@@ -1,5 +1,3 @@
-
-```
 # Asset Management System - Backend
 
 ## Overview
@@ -10,8 +8,15 @@ The Asset Management System Backend is a Node.js application developed using Typ
 
 To set up the project locally, follow these steps:
 
+- Install dependencies:
+
 ```bash
 npm install
+```
+
+- Start the application:
+
+```bash
 npm start
 ```
 
@@ -48,4 +53,3 @@ If you would like to contribute to the project, feel free to fork the repository
 For any inquiries or assistance, reach out to our developer's WhatsApp group.
 
 Happy coding! 🚀
-```
