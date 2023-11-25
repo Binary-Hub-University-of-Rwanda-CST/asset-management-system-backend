@@ -4,10 +4,10 @@ import { createUser, getAllUsers } from '../services/userService';
 const router = express.Router();
 
 router.post('/users', async (req, res) => {
-  const { email, name } = req.body;
+  const { email, name, password } = req.body;
 
   try {
-    const newUser = await createUser(email, name);
+    const newUser = await createUser(email, name, password);
     res.status(201).json(newUser);
   } catch (error) {
     console.error(error);
