@@ -3,12 +3,15 @@ const cors = require('cors');
 require('dotenv').config();
 import passport from '../services/passport-config';
 import authenticateJWT from '../services/authMiddleware';
+import registUserRoute from '../routes/registUserRoute';
 
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 app.use(passport.initialize());
+
+app.use('/api', registUserRoute)
 
 
 app.get('/', (req: Request, res: Response) => {
