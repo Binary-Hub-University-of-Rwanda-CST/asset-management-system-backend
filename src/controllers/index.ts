@@ -3,6 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 import passport from '../services/passport-config';
 import authenticateJWT from '../services/authMiddleware';
+import registUserRoute from '../routes/registUserRoute';
 
 
 const app = express();
@@ -13,6 +14,7 @@ app.use(passport.initialize());
 app.use('/api', userRoute);
 app.use('/api', forgotPasswordRouter);
 app.use('/api', changePassword);
+app.use('/api', registUserRoute)
 
 app.get('/', (req: Request, res: Response) => {
     res.json({resStatus: true, resMsg: "AMS Server is running Smoothly!"})
