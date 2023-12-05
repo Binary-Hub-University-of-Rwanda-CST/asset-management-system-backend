@@ -11,8 +11,10 @@ app.use(express.json());
 app.use(cors());
 app.use(passport.initialize());
 
+app.use('/api', userRoute);
+app.use('/api', forgotPasswordRouter);
+app.use('/api', changePassword);
 app.use('/api', registUserRoute)
-
 
 app.get('/', (req: Request, res: Response) => {
     res.json({resStatus: true, resMsg: "AMS Server is running Smoothly!"})
