@@ -1,36 +1,39 @@
-import express from "express";
-import dotenv from "dotenv";
-import passport from './services/passport-config';
-import allRouter from "./routes";
-import { PrismaClient } from "@prisma/client";
+import { Server } from 'http';
+import app from './app';
+import prisma from './client';
+import config from './config/config';
+import logger from './config/logger';
 
-const cors = require('cors');
+let server: Server;
+prisma.$connect().then(() => {
+  logger.info('Connected to PostgresSql Database');
+  server = app.listen(config.port, () => {
+    logger.info(`Listening to port ${config.port}`);
+  });
+});
 
-dotenv.config();
-const app = express();
-const prisma = new PrismaClient();
-
-const PORT = process.env.PORT || 9090;
-
-const connectDB = async () => {
-  await prisma.$connect();
-  console.log("DB Connected Successfull......");
-};
-
-app.use(express.json());
-app.use(cors());
-app.use(passport.initialize());
-app.use('/api', allRouter);
-
-const startServer = async () => {
-  try {
-    await connectDB();
-    app.listen(PORT, () => {
-      console.log(`Server is running at port ${PORT}`);
+const exitHandler = () => {
+  if (server) {
+    server.close(() => {
+      logger.info('Server closed');
+      process.exit(1);
     });
-  } catch (error) {
-    console.error("Error connecting to the database:", error);
+  } else {
+    process.exit(1);
   }
 };
 
-startServer();
+const unexpectedErrorHandler = (error: unknown) => {
+  logger.error(error);
+  exitHandler();
+};
+
+process.on('uncaughtException', unexpectedErrorHandler);
+process.on('unhandledRejection', unexpectedErrorHandler);
+
+process.on('SIGTERM', () => {
+  logger.info('SIGTERM received');
+  if (server) {
+    server.close();
+  }
+});

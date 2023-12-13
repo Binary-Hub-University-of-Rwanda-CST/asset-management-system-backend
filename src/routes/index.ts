@@ -1,8 +1,17 @@
-import express from "express";
-import  loginUser  from "./auth/authRoute";
+import express from 'express';
+import authRoute from './auth/authRoute';
 
 const router = express.Router();
 
-router.use("/auth", loginUser);
+const defaultRoutes = [
+  {
+    path: '/auth',
+    route: authRoute,
+  },
+];
+
+defaultRoutes.forEach((route) => {
+  router.use(route.path, route.route);
+});
 
 export default router;
