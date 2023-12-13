@@ -3,7 +3,7 @@ const cors = require('cors');
 require('dotenv').config();
 import passport from '../services/passport-config';
 import authenticateJWT from '../services/authMiddleware';
-import registUserRoute from '../routes/registUserRoute';
+import registUserRoute from '../routes/user/registUserRoute';
 
 
 const app = express();

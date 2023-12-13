@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import Joi from 'joi';
-import changePassword from '../services/changePassword'
+import changePassword from '../../services/changePassword'
 
 const router = express.Router();
 

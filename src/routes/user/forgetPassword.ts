@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express';
 import Joi from 'joi';
-import resetPassword from '../services/resetPassword'
+import resetPassword from '../../services/resetPassword'
 
 const router = express.Router();
 

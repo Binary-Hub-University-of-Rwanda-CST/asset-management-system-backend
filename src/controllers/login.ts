@@ -11,6 +11,10 @@ interface jwtPayload {
   email: string
 }
 
+const userData = {
+
+}
+
 export const loginUser = async (req: Request, res: Response) => {
 
   try {
@@ -30,10 +34,12 @@ export const loginUser = async (req: Request, res: Response) => {
 
     const token = generateToken(existUser);
 
-    res.status(200).json({ message: "Login Successful", token });
+    res.status(200).json({ message: "Login Successful", token, user: userData });
 
-  } catch (error) {
-    return res.status(500).json({ error });
+  }
+  catch (error)
+  {
+    return res.status(500).json({ "msg": error});
   }
 };
 

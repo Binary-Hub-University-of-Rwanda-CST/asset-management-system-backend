@@ -5,7 +5,7 @@ interface User {
   email: string;
   gender: string;
   nid: string;
-  marital_status: string;
+  martial_status: string;
   nationality: string;
   img?: string | null;
   password: string;

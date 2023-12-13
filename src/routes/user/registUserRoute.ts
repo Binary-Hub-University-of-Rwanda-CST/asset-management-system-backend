@@ -1,7 +1,7 @@
 import express from 'express';
 import Joi from 'joi';
-import User from '../models/User';
-import { registerUser } from '../services/registUser';
+import User from '../../models/User';
+import { registerUser } from '../../services/registUser';
 
 const registUserRoute = express.Router();
 
