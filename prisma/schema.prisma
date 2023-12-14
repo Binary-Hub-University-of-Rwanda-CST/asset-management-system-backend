@@ -17,7 +17,7 @@ model User {
   email           String             @unique
   gender          String
   nid             String
-  martial_status  String
+  marital_status  String
   nationality     String
   img             String?
   password        String
@@ -35,7 +35,7 @@ model test {
 model ResetPasswordTokens {
   id Int @id @default(autoincrement())
   token String
-  tokenUserEmail String
+  tokenUserEmail String  @unique
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

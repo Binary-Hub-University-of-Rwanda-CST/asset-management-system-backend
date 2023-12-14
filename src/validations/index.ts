@@ -1,1 +1,1 @@
-export { default as authValidation } from './loginValidation';
+export { default as authValidation } from './userValidation';

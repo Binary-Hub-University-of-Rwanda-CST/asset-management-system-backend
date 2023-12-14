@@ -18,5 +18,12 @@ const registration = Joi.object({
   password: Joi.string().min(6).required(),
   code: Joi.string().allow(null),
 });
+const emailVerification = Joi.object({
+  email: Joi.string().email().required(),
+});
+const updatePassword = Joi.object({
+  newPassword: Joi.string().min(6).required(),
+  confirmPassword: Joi.string().valid(Joi.ref('newPassword')).required(),
+})
 
-export default { login, registration };
+export default { login, registration, emailVerification, updatePassword };
