@@ -14,5 +14,8 @@ routes.post(
   validate(authValidation.registration),
   UserController.registerUser
 );
+routes.post("/resetPassword", validate(authValidation.emailVerification), UserController.resetPassword);
+routes.post("/verify-email/:email", UserController.emailVerification);
+routes.post("/updatePassword/:token", validate(authValidation.updatePassword), UserController.updatePassword);
 
 export default routes;
