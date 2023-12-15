@@ -6,7 +6,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "gender" TEXT NOT NULL,
     "nid" TEXT NOT NULL,
-    "martial_status" TEXT NOT NULL,
+    "marital_status" TEXT NOT NULL,
     "nationality" TEXT NOT NULL,
     "img" TEXT,
     "password" TEXT NOT NULL,
