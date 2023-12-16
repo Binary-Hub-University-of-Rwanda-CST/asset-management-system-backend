@@ -4,6 +4,7 @@ import { User } from '@prisma/client';
 import { encryptPassword } from '../utils/encryption';
 
 interface Token {
+  id: number;
   token: string;
 }
 
@@ -83,17 +84,25 @@ function storeResetToken(user: User, token: string): void {
 const resetPassword = async (email: string): Promise<boolean> => {
   try {
     const existingUser = await findUserByEmail(email);
-
+    const codeExist = await isCodeExist(email);
     if (!existingUser) {
       return false;
     }
 
     const resetCode: string = generateCode();
 
-    storeResetCode(existingUser, resetCode);
+    if (codeExist) {
+      await prisma.resetPasswordTokens.delete({
+        where: {
+          id: codeExist.id
+        }
+      })
+      storeResetCode(existingUser, resetCode);
+    } else {
+      storeResetCode(existingUser, resetCode);
+    }
 
     await sendResetEmail(existingUser.email, resetCode);
-
     return true;
   } catch (error: any) {
     console.error(`Error in resetPassword: ${error.message}`);
@@ -158,6 +167,26 @@ const findUserCode = async (email: string, code: string): Promise<Token | null> 
   }
   catch (error: any) {
     console.error(`token not found: ${error.message}`);
+    return null;
+  }
+};
+
+const isCodeExist = async (email: string): Promise<Token | null> => {
+  try {
+    const useCode = await prisma.resetPasswordTokens.findFirst({
+      where: {
+        tokenUserEmail: email,
+      },
+    });
+
+    if (useCode)
+      return useCode;
+    else
+      return null;
+
+  }
+  catch (error: any) {
+    console.error(` Server Error: ${error.message}`);
     return null;
   }
 };
