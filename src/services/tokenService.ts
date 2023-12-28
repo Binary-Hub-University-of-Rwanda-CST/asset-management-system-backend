@@ -9,14 +9,14 @@ import prisma from '../client';
 
 /**
  * Generate token
- * @param {number} userId
+ * @param {string} userId
  * @param {Moment} expires
  * @param {string} type
  * @param {string} [secret]
  * @returns {string}
  */
 const generateToken = (
-  userId: number,
+  userId: string,
   expires: Moment,
   type: TokenType,
   secret: string = config.jwt.secret
@@ -33,7 +33,7 @@ const generateToken = (
 /**
  * Save a token
  * @param {string} token
- * @param {number} userId
+ * @param {string} userId
  * @param {Moment} expires
  * @param {string} type
  * @param {boolean} [blacklisted]
@@ -41,7 +41,7 @@ const generateToken = (
  */
 const saveToken = async (
   token: string,
-  userId: number,
+  userId: string,
   expires: Moment,
   type: TokenType,
   blacklisted: boolean = false
@@ -66,7 +66,7 @@ const saveToken = async (
  */
 const verifyToken = async (token: string, type: TokenType): Promise<Token> => {
   const payload = jwt.verify(token, config.jwt.secret);
-  const userId = Number(payload.sub);
+  const userId = String(payload.sub);
   const tokenData = await prisma.token.findFirst({
     where: { token, type, userId, blacklisted: false },
   });
@@ -82,7 +82,7 @@ const verifyToken = async (token: string, type: TokenType): Promise<Token> => {
  * @returns {Promise<AuthTokensResponse>}
  */
 const generateAuthTokens = async (user: {
-  id: number;
+  id: string;
 }): Promise<{ access: { token: string; expires: Date } }> => {
   const accessTokenExpires = moment().add(
     config.jwt.accessExpirationMinutes,
@@ -122,13 +122,13 @@ const generateResetPasswordToken = async (email: string): Promise<string> => {
     'minutes'
   );
   const resetPasswordToken = generateToken(
-    user.id as number,
+    user.id as string,
     expires,
     TokenType.RESET_PASSWORD
   );
   await saveToken(
     resetPasswordToken,
-    user.id as number,
+    user.id as string,
     expires,
     TokenType.RESET_PASSWORD
   );

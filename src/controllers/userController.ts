@@ -12,6 +12,16 @@ import { TokenType } from '@prisma/client';
 export const loginUser = catchAsync(async (req: Request, res: Response) => {
   const existUser = await prisma.user.findFirst({
     where: { email: req.body.email },
+    include: {
+      location: {
+        include: {
+          building: true,
+          room: true,
+        },
+      },
+      occupation_address: true,
+      role: true,
+    },
   });
 
   if (!existUser) {
@@ -30,7 +40,7 @@ export const loginUser = catchAsync(async (req: Request, res: Response) => {
   res.status(200).json({
     message: 'Login Successful',
     token: accessToken,
-    user: exclude(existUser, ['password', 'createdAt', 'updatedAt']),
+    user: exclude(existUser, ['password']),
   });
 });
 
@@ -40,12 +50,22 @@ export const currentUserLogin = catchAsync(
 
     const existUser = await prisma.user.findFirst({
       where: { id: user.id },
+      include: {
+        location: {
+          include: {
+            building: true,
+            room: true,
+          },
+        },
+        occupation_address: true,
+        role: true,
+      },
     });
 
     res.status(200).json({
       message: 'Welcome back',
       data: existUser
-        ? exclude(existUser, ['password', 'createdAt', 'updatedAt'])
+        ? exclude(existUser, ['password'])
         : null,
     });
   }
@@ -59,9 +79,9 @@ const resetPassword = catchAsync(async (req: Request, res: Response) => {
   try {
     const email = req.body.email;
     if (await UserService.resetPassword(email)) {
-      res.status(200).json({ message: "Reset password email has been sent to " + email })
+      return res.status(200).json({ message: "Reset password email has been sent to " + email })
     } else
-    res.status(400).json({ message: `Email ${email} was not found` })
+    return res.status(400).json({ message: `Email ${email} was not found` })
   } catch (error) {
     res.status(500).json({ message: "Server Error", error })
   }
@@ -98,7 +118,6 @@ const emailVerification = catchAsync(async (req: Request, res: Response) => {
 const updatePassword = catchAsync(async (req: Request, res: Response) => {
 
   try {
-
     const token = req.params.token;
     const userData = TokenService.verifyToken(token, TokenType.RESET_PASSWORD);
     const user = await UserService.findUserById((await userData).userId)
@@ -106,12 +125,11 @@ const updatePassword = catchAsync(async (req: Request, res: Response) => {
     const hashedPassword = await encryptPassword(newPassword);
     const isPasswordChanged = (user?.email) ? await UserService.changePassword(user?.email, hashedPassword) : false;
     if (isPasswordChanged) {
-      res.status(200).json({ message: 'Password changed successfully' });
+      return res.status(200).json({ message: 'Password changed successfully' });
     }
     else {
-      console.log(userData);
-
-      res.status(400).json({ message: 'Password not Changed' });
+      // console.log(userData);
+      return res.status(400).json({ message: 'Password not Changed' });
     }
   } catch (error) {
     res.status(500).json({ message: "Server error", error })
