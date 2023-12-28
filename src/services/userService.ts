@@ -1,6 +1,6 @@
 import prisma from '../client';
 import * as nodemailer from 'nodemailer';
-import { User } from '@prisma/client';
+import { User, mapPrismaUserToMappedUser, MappedUser } from '../models';
 import { encryptPassword } from '../utils/encryption';
 
 interface Token {
@@ -8,23 +8,54 @@ interface Token {
   token: string;
 }
 
-const registerUser = async (userData: User): Promise<User> => {
+const registerUser = async (userData: User): Promise<User | null> => {
   const createdUser = await prisma.user.create({
     data: {
       names: userData.names,
       phone: userData.phone,
       email: userData.email,
-      gender: userData.gender,
-      nid: userData.nid,
-      marital_status: userData.marital_status,
-      nationality: userData.nationality,
-      img: userData.img,
       password: await encryptPassword(userData.password),
-      code: userData.code,
+      location: {
+        create: userData.location.map(loc => ({
+          status: loc.status,
+          building: {
+            create: {
+              id: loc.building.id,
+              name: loc.building.name,
+            },
+          },
+          room: {
+            create: {
+              id: loc.room.id,
+              name: loc.room.name,
+            },
+          },
+        })),
+      },
+      is_line_manager: userData.is_line_manager,
+      occupation_address: {
+        create: {
+          id: userData.occupation_address.id,
+          name: userData.occupation_address.name,
+          type: userData.occupation_address.type,
+          parent_id: userData.occupation_address.parent_id,
+        },
+      },
+      report_to: userData.report_to,
+      role: {
+        create: {
+          id: userData.role.id,
+          name: userData.role.name,
+          access: userData.role.access,
+        },
+      },
+      custom_access: userData.custom_access,
     },
   });
-  return createdUser;
+  
+  return findUserById(createdUser.id);
 };
+
 const changePassword = async (
   userEmail: string,
   newPassword: string
@@ -58,18 +89,51 @@ const findUserByEmail = async (email: string): Promise<User | null> => {
     where: {
       email: email,
     },
-  });
-  return user;
-};
-
-const findUserById = async (id: number): Promise<User | null> => {
-  const user = await prisma.user.findUnique({
-    where: {
-      id,
+    include: {
+      location: {
+        include: {
+          building: true,
+          room: true,
+        },
+      },
+      occupation_address: true,
+      role: true,
     },
   });
-  return user;
+
+  if (!user) {
+    return null;
+  }
+
+  return mapPrismaUserToMappedUser(user);
 };
+
+
+
+const findUserById = async (userId: string): Promise<User | null> => {
+  const user = await prisma.user.findUnique({
+    where: {
+      id: userId,
+    },
+    include: {
+      location: {
+        include: {
+          building: true,
+          room: true,
+        },
+      },
+      occupation_address: true,
+      role: true,
+    },
+  });
+
+  if (!user) {
+    return null;
+  }
+
+  return mapPrismaUserToMappedUser(user);
+};
+
 
 function storeResetToken(user: User, token: string): void {
   const tokenUserEmail = user.email;
@@ -124,15 +188,15 @@ const sendResetEmail = async (email: string, token: string): Promise<void> => {
   const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
-      user: process.env.EMAIL,
-      pass: process.env.EMAIL_PASSWORD,
+      user: process.env.EMAIL_FROM,
+      pass: process.env.EMAIL_FROM_PASSWORD,
     },
   });
 
   const mailOptions = {
     from: process.env.EMAIL,
     to: email,
-    subject: 'Password Reset',
+    subject: 'BinaryHub AMS - Password Reset',
     html: `<p>Hi<br />
     Please enter the 6-digit code below on the email verification page:<h2> ${token} </h2> Remember, beware of scams and keep this one-time verification code confidential.<br />
     Thanks, </p>`,

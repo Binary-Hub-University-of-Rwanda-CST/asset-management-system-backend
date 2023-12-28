@@ -13,6 +13,6 @@
     "noImplicitAny": true,
     "removeComments": true
   },
-  "include": ["src"],
+  "include": ["src", "tests/models/AssetCategory.ts"],
   "exclude": ["dist", "prisma", "node_modules"]
 }

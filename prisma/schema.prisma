@@ -1,37 +1,72 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-generator client {
-  provider = "prisma-client-js"
-}
-
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
+generator client {
+  provider = "prisma-client-js"
+}
+
 model User {
-  id              Int                @id @default(autoincrement())
+  id              String    @id @default(cuid())
   names           String
   phone           String
-  email           String             @unique
-  gender          String
-  nid             String
-  marital_status  String
-  nationality     String
-  img             String?
+  email           String    @unique
   password        String
-  code            String?
+  location        Location[]
+  is_line_manager Boolean
+  occupation_address_id Int
+  report_to       String?
+  role_id         Int
+  custom_access   String[]
   Token           Token[]
-  createdAt            DateTime           @default(now())
-  updatedAt            DateTime           @updatedAt
+  //relations
+  role           Role      @relation(fields: [role_id], references: [id])
+  occupation_address OccupationAddress @relation(fields: [occupation_address_id], references: [id])
 }
-model test {
-  id        Int      @id @default(autoincrement())
-  name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+
+model Role {
+  id    Int      @id @default(autoincrement())
+  name       String
+  access     String[]
+  users      User[]
 }
+
+model OccupationAddress {
+  id          Int       @id @default(autoincrement())
+  name        String
+  type        String
+  parent_id   Int?
+  users       User[]
+}
+
+
+
+model Location {
+  id        String   @id @default(uuid())
+  user_id    String
+  status    String
+  building_id String
+  room_id String
+  //relations
+  user      User     @relation(fields: [user_id], references: [id])
+  building  Building @relation(fields: [building_id], references: [id])
+  room      Room @relation(fields: [room_id], references: [id])
+}
+
+model Building {
+  id      String   @id @default(uuid())
+  name    String
+  location Location[]
+}
+
+model Room {
+  id     String   @id @default(uuid())
+  name   String
+  location Location[]
+}
+
+
 model ResetPasswordTokens {
   id Int @id @default(autoincrement())
   token String
@@ -48,9 +83,58 @@ model Token {
   blacklisted Boolean
   createdAt   DateTime  @default(now())
   user        User      @relation(fields: [userId], references: [id])
-  userId      Int
+  userId      String
 }
 enum TokenType {
   ACCESS
   RESET_PASSWORD
+}
+
+
+//ASSETS
+model Asset {
+  asset_id          String   @id @default(uuid())
+  category_id       String
+  brand_id          String
+  stock_id          String
+  supplier_id       String
+  purchase_order_number String
+  value             Float
+  life_span_years   Int
+  date_in           String
+  //relations
+  brand             Brand    @relation(fields: [brand_id], references: [id])
+  category          AssetCategory  @relation(fields: [category_id], references: [asset_category_id])
+  stock             Stock    @relation(fields: [stock_id], references: [id])
+  supplier          Supplier @relation(fields: [supplier_id], references: [id])
+}
+
+model AssetCategory {
+  asset_category_id String   @id @default(uuid())
+  category_name     String
+  assets            Asset[]
+  specifications Specification[]
+}
+
+model Specification {
+  id          String   @id @default(uuid())
+  name        String
+  values      String[]
+  category_id  String
+  category  AssetCategory @relation(fields: [category_id], references: [asset_category_id])
+}
+model Stock {
+  id      String       @id @default(uuid())
+  name    String
+  assets  Asset[]
+}
+model Brand {
+  id      String       @id @default(uuid())
+  name    String
+  assets  Asset[]
+}
+model Supplier {
+  id      String       @id @default(uuid())
+  name    String
+  assets  Asset[]
 }
